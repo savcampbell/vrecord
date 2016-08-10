@@ -1004,8 +1004,10 @@ read
 
 #create log of vrecord decisions
 INGESTLOG="${logdir}/${id}_capture_options.log"
+AUDIOLOG="${logdir}/${id}_audio_levels.log"
 
 touch "${INGESTLOG}"
+touch "${AUDIOLOG}"
 
 _writeingestlog "computer_name" "$(uname -n)"
 _writeingestlog "user_name" "$(whoami)"
@@ -1042,7 +1044,8 @@ mkfifo PIPE2QCTOOLS
 bmdcapture -m ${standard} -V "${video_input}" -A "${audio_input}" -c 8 -s 32 -p "${video_bitdepth}" -F nut -f pipe:1 2> "${logdir}/${id}${bmdcapturelogsuffix}" | \
     tee >(ffplay -i - -v info \
                 -hide_banner -stats -autoexit \
-                -window_title "mode:${runtype} - video:'${video_input_choice}' audio:'${audio_input_choice}'" -vf "${playbackfilter}") | \
+                -window_title "mode:${runtype} - video:'${video_input_choice}' audio:'${audio_input_choice}'" -vf "${playbackfilter}")
+    >(ffmpeg -i - -af volumedetect -f null /dev/null 2>&1 | grep volumedetect >> "${AUDIOLOG}")| \
     ffmpeg -v info -hide_banner -stats ${inputoptions[@]} -i - ${middleoptions[@]} \
         -metadata:s:v:0 encoder="${codecname}" \
         -c:a pcm_s24le \
@@ -1064,7 +1067,8 @@ if [[ "${qctoolsxml_choice}" = "No" ]] ; then
     bmdcapture -m ${standard} -V "${video_input}" -A "${audio_input}" -c 8 -s 32 -p "${video_bitdepth}" -F nut -f pipe:1 2> "${logdir}/${id}${bmdcapturelogsuffix}" | \
         tee >(ffplay -i - -v info \
                     -hide_banner -stats -autoexit \
-                    -window_title "mode:${runtype} - video:'${video_input_choice}' audio:'${audio_input_choice}'" -vf "${playbackfilter}") | \
+                    -window_title "mode:${runtype} - video:'${video_input_choice}' audio:'${audio_input_choice}'" -vf "${playbackfilter}")
+    >(ffmpeg -i - -af volumedetect -f null /dev/null 2>&1 | grep volumedetect >> "${AUDIOLOG}") | \
         ffmpeg -v info -hide_banner -stats ${inputoptions[@]} -i - ${middleoptions[@]} \
             -metadata:s:v:0 encoder="${codecname}" \
             -c:a pcm_s24le \
