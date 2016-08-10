@@ -1045,7 +1045,7 @@ bmdcapture -m ${standard} -V "${video_input}" -A "${audio_input}" -c 8 -s 32 -p 
     tee >(ffplay -i - -v info \
                 -hide_banner -stats -autoexit \
                 -window_title "mode:${runtype} - video:'${video_input_choice}' audio:'${audio_input_choice}'" -vf "${playbackfilter}") \
-    >(ffmpeg -i - -af volumedetect -f null /dev/null 2>&1 | grep volumedetect >> "${AUDIOLOG}")| \
+    >(ffmpeg -i - -af volumedetect -f null /dev/null 2>&1 | grep volumedetect | cut -d ' '  -f 4-5 >> "${AUDIOLOG}")| \
     ffmpeg -v info -hide_banner -stats ${inputoptions[@]} -i - ${middleoptions[@]} \
         -metadata:s:v:0 encoder="${codecname}" \
         -c:a pcm_s24le \
@@ -1068,7 +1068,7 @@ if [[ "${qctoolsxml_choice}" = "No" ]] ; then
         tee >(ffplay -i - -v info \
                     -hide_banner -stats -autoexit \
                     -window_title "mode:${runtype} - video:'${video_input_choice}' audio:'${audio_input_choice}'" -vf "${playbackfilter}") \
-    >(ffmpeg -i - -af volumedetect -f null /dev/null 2>&1 | grep volumedetect >> "${AUDIOLOG}") | \
+    >(ffmpeg -i - -af volumedetect -f null /dev/null 2>&1 | grep volumedetect | cut -d ' '  -f 4-5 >> "${AUDIOLOG}" | \
         ffmpeg -v info -hide_banner -stats ${inputoptions[@]} -i - ${middleoptions[@]} \
             -metadata:s:v:0 encoder="${codecname}" \
             -c:a pcm_s24le \
